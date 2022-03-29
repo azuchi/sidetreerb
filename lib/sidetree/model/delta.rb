@@ -12,6 +12,14 @@ module Sidetree
         Sidetree::OP::Validator.validate_delta!(object)
         Delta.new(object[:patches], object[:updateCommitment])
       end
+
+      def to_h
+        {patches: patches, updateCommitment: update_commitment}
+      end
+
+      def to_hash
+        Sidetree.to_hash(to_h)
+      end
     end
   end
 end

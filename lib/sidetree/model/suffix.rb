@@ -17,10 +17,10 @@ module Sidetree
         {deltaHash: delta_hash, recoveryCommitment: recovery_commitment}
       end
 
+      # Calculate unique suffix
+      # @return [String] unique suffix
       def unique_suffix
-        digest = Digest::SHA256.digest(to_h.to_json_c14n)
-        multi_hash = Multihashes.encode(digest, 'sha2-256') # TODO Need to decide on what hash algorithm to use when hashing suffix data - https://github.com/decentralized-identity/sidetree/issues/965
-        Base64.urlsafe_encode64(multi_hash, padding: false)
+        Sidetree.to_hash(to_h)
       end
     end
   end
