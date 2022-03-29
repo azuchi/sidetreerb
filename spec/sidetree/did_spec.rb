@@ -54,6 +54,33 @@ RSpec.describe Sidetree::DID do
           expect {subject}.to raise_error(Sidetree::Error, 'Unsupported DID format.')
         end
       end
+
+      context 'long suffix not json' do
+        let(:did) {"did:sidetree:EiCpTgB_VcGO8hr4dYIvdKVfIPpzEDwSbbPxRJ0Acx4Xzw:#{Base64.urlsafe_encode64('notJson', padding: false)}"}
+        it 'raise error' do
+          expect {subject}.to raise_error(Sidetree::Error, 'Long form initial state should be encoded jcs.')
+        end
+      end
+
+      context 'long suffix is not jcs' do
+        let(:did) {"did:sidetree:EiCpTgB_VcGO8hr4dYIvdKVfIPpzEDwSbbPxRJ0Acx4Xzw:#{Base64.urlsafe_encode64({z: 1, a: 2, b: 1}.to_json, padding: false)}"}
+        it 'raise error' do
+          expect {subject}.to raise_error(Sidetree::Error, 'Initial state object and JCS string mismatch.')
+        end
+      end
+
+      context 'delta exceeds size limit' do
+        let(:did) do
+          large_data = { data: Random.bytes(2000).unpack1('H*') }
+          suffix = {deltaHash: "EiA9Ni05HjwUXJNelUv-Aj3V53uyir8A4LJbudk-gl_74w",
+                    recoveryCommitment:"EiAhcLdvRLjYjn8bKkWtsKPn5rqq2Qeuf_aWCbc4ZahG3w"}
+          long_suffix = Base64.urlsafe_encode64({ suffixData: suffix, delta: large_data }.to_json_c14n, padding: false)
+          "did:sidetree:EiCpTgB_VcGO8hr4dYIvdKVfIPpzEDwSbbPxRJ0Acx4Xzw:#{long_suffix}"
+        end
+        it 'raise error' do
+          expect {subject}.to raise_error(Sidetree::Error, "4011 bytes of 'delta' exceeded limit of 1000 bytes.")
+        end
+      end
     end
   end
 
