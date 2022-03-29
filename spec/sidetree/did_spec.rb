@@ -38,7 +38,7 @@ RSpec.describe Sidetree::DID do
         expect(subject.method).to eq('sidetree')
         expect(subject.suffix).to eq('EiCpTgB_VcGO8hr4dYIvdKVfIPpzEDwSbbPxRJ0Acx4Xzw')
         expect(subject.long_suffix).to eq('eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W10sInNlcnZpY2VzIjpbXX19XSwidXBkYXRlQ29tbWl0bWVudCI6IkVpREx6djJQbGJRc1BscjU2VmpGeUo5YW4xTW54M1hVSHBVcktoT1hrdEFQZGcifSwic3VmZml4RGF0YSI6eyJkZWx0YUhhc2giOiJFaUE5TmkwNUhqd1VYSk5lbFV2LUFqM1Y1M3V5aXI4QTRMSmJ1ZGstZ2xfNzR3IiwicmVjb3ZlcnlDb21taXRtZW50IjoiRWlBaGNMZHZSTGpZam44YktrV3RzS1BuNXJxcTJRZXVmX2FXQ2JjNFphaEczdyJ9fQ')
-        expect(subject.create_op.suffix.delta_hash).to eq(subject.create_op.delta.to_hash)
+        expect(subject.create_op.match_delta_hash?).to be true
       end
 
       context 'Encoded DID document mismatches short-form DID' do
