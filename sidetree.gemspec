@@ -32,6 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'json-jwt', "~> 1.13.0"
   spec.add_dependency 'json-canonicalization', '~> 0.3.0'
   spec.add_dependency 'multihashes', '~> 0.2.0'
+  spec.add_runtime_dependency 'thor'
 
   # For more information and examples about making a new gem, checkout our
   # guide at: https://bundler.io/guides/creating_gem.html
