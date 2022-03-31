@@ -7,8 +7,30 @@ RSpec.describe Sidetree::Key do
       expect(subject).to be_a(JSON::JWK)
       expect(subject['x']).to eq('mZT44XgevHQ-7_thiCit2TGuTg_kbxVtcznWf88NvPQ')
       expect(subject['y']).to eq('OwDl7AGBcJyMufDs3lwdiF3zvVifoPn6DgwVEhg_E0M')
-      expect(subject['kty']).to eq(:EC)
-      expect(subject['crv']).to eq(:secp256k1)
+      expect(subject['kty']).to eq('EC')
+      expect(subject['crv']).to eq('secp256k1')
+    end
+  end
+
+  describe '#from_hash' do
+    subject { Sidetree::Key.from_hash(data) }
+    context 'has only public key' do
+      let(:data) { fixture_file('inputs/jwkEs256k1Public.json') }
+      it 'generate Key instance' do
+        expect(subject.private_key).to be nil
+        jwk = subject.to_jwk
+        expect(jwk['x']).to eq(data['x'])
+        expect(jwk['y']).to eq(data['y'])
+      end
+    end
+    context 'has private key' do
+      let(:data) { fixture_file('inputs/jwkEs256k1Private.json') }
+      it 'generate Key instance' do
+        expect(subject.private_key).to eq(Base64.urlsafe_decode64(data['d']).unpack1('H*').to_i(16))
+        jwk = subject.to_jwk
+        expect(jwk['x']).to eq(data['x'])
+        expect(jwk['y']).to eq(data['y'])
+      end
     end
   end
 end
