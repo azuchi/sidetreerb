@@ -2,11 +2,11 @@ module Sidetree
 
   class Key
 
-    attr_reader :private_key, :public_key, :id, :purpose
+    attr_accessor :private_key, :public_key, :id, :purposes, :type
 
     # @param [Integer] private_key private key.
     # @param [ECDSA::Point] public_key public key
-    def initialize(private_key: nil, public_key: nil, id: nil, purpose: nil)
+    def initialize(private_key: nil, public_key: nil, id: nil, purposes: [], type: nil)
       if private_key
         raise Error, 'private key is invalid range.' unless Key.valid_private_key?(private_key)
 
@@ -25,10 +25,13 @@ module Sidetree
 
       @public_key = public_key
 
-      raise Error, "Unknown purpose '#{purpose}' specified." if purpose && !PublicKeyPurpose.values.include?(purpose)
+      purposes.each do |purpose|
+        raise Error, "Unknown purpose '#{purpose}' specified." if purpose && !Sidetree::OP::PublicKeyPurpose.values.include?(purpose)
+      end
 
-      @purpose = purpose
+      @purposes = purposes
       @id = id
+      @type = type
     end
 
     # Generate Secp256k1 key.
@@ -36,29 +39,31 @@ module Sidetree
     # @option [String] purpose Purpose for public key. Supported values defined by [Sidetree::PublicKeyPurpose].
     # @return [Sidetree::Key]
     # @raise [Sidetree::Error]
-    def self.generate(id: nil, purpose: nil)
+    def self.generate(id: nil, purposes: [])
       private_key = 1 + SecureRandom.random_number(ECDSA::Group::Secp256k1.order - 1)
-      Key.new(private_key: private_key, purpose: purpose, id: id)
+      Key.new(private_key: private_key, purposes: purposes, id: id)
     end
 
     # Generate key instance from jwk Hash.
-    # @param [Hash] jwk_hash jwk Hash object.
+    # @param [Hash] json jwk Hash object.
     # @return [Sidetree::Key]
     # @raise [Sidetree::Error]
-    def self.from_hash(jwk_hash)
-      key_type = jwk_hash['kty']
-      curve = jwk_hash['crv']
+    def self.from_json(json)
+      key_json = json['publicKeyJwk'] ? json['publicKeyJwk'] : json
+      key_type = key_json['kty']
+      curve = key_json['crv']
       raise Error, "Unsupported key type '#{key_type}' specified." if key_type.nil? || key_type != 'EC'
       raise Error, "Unsupported curve '#{curve}' specified." if curve.nil? || curve != 'secp256k1'
-      raise Error, 'x property required.' unless jwk_hash['x']
-      raise Error, 'y property required.' unless jwk_hash['y']
+      raise Error, 'x property required.' unless key_json['x']
+      raise Error, 'y property required.' unless key_json['y']
 
-      x = Base64.urlsafe_decode64(jwk_hash['x'])
-      y = Base64.urlsafe_decode64(jwk_hash['y'])
+      x = Base64.urlsafe_decode64(key_json['x'])
+      y = Base64.urlsafe_decode64(key_json['y'])
       point = ECDSA::Format::PointOctetString.decode(['04'].pack('H*') + x + y, ECDSA::Group::Secp256k1)
-      private_key = jwk_hash['d'] ? Base64.urlsafe_decode64(jwk_hash['d']).unpack1('H*').to_i(16) : nil
+      private_key = key_json['d'] ? Base64.urlsafe_decode64(key_json['d']).unpack1('H*').to_i(16) : nil
 
-      Key.new(public_key: point, private_key: private_key)
+      purposes = json['purposes'] ? json['purposes'] : []
+      Key.new(public_key: point, private_key: private_key, purposes: purposes, id: json['id'], type: json['type'])
     end
 
     # Check whether private is valid range.

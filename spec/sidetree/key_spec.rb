@@ -12,8 +12,8 @@ RSpec.describe Sidetree::Key do
     end
   end
 
-  describe '#from_hash' do
-    subject { Sidetree::Key.from_hash(data) }
+  describe '#from_json' do
+    subject { Sidetree::Key.from_json(data) }
     context 'has only public key' do
       let(:data) { fixture_file('inputs/jwkEs256k1Public.json') }
       it 'generate Key instance' do
@@ -30,6 +30,18 @@ RSpec.describe Sidetree::Key do
         jwk = subject.to_jwk
         expect(jwk['x']).to eq(data['x'])
         expect(jwk['y']).to eq(data['y'])
+      end
+    end
+
+    context 'pubkey model json' do
+      let(:data) { fixture_file('inputs/publicKeyModel1.json') }
+      it 'has purpose and id, type' do
+        jwk = subject.to_jwk
+        expect(jwk['x']).to eq(data['publicKeyJwk']['x'])
+        expect(jwk['y']).to eq(data['publicKeyJwk']['y'])
+        expect(subject.id).to eq('publicKeyModel1Id')
+        expect(subject.type).to eq('EcdsaSecp256k1VerificationKey2019')
+        expect(subject.purposes).to eq(%w[authentication keyAgreement])
       end
     end
   end
