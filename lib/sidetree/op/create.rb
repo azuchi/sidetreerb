@@ -51,7 +51,7 @@ module Sidetree
       # @param [String] method DID method.
       # @param [Boolean] include_long
       # @return [String] DID
-      def did(method: 'sidetree', include_long: false)
+      def did(method: Sidetree::Params::DEFAULT_METHOD, include_long: false)
         did = "did:#{method}:#{suffix.unique_suffix}"
         did += ":#{long_suffix}" if include_long
         did

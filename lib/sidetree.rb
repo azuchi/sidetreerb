@@ -22,6 +22,8 @@ module Sidetree
     HASH_ALGORITH_STRING = 'sha2-256'
     # Maximum canonicalized operation delta buffer size.
     MAX_DELTA_SIZE = 1000
+
+    DEFAULT_METHOD = 'sidetree'
   end
 
   module_function
