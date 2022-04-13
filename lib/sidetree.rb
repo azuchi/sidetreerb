@@ -7,6 +7,7 @@ require 'base64'
 require 'json'
 require 'json/canonicalization'
 require 'uri'
+require 'multihashes'
 
 module Sidetree
   class Error < StandardError; end
@@ -15,6 +16,7 @@ module Sidetree
   autoload :DID, 'sidetree/did'
   autoload :Model, 'sidetree/model'
   autoload :OP, 'sidetree/op'
+  autoload :Validator, 'sidetree/validator'
 
   module Params
     # Algorithm for generating hashes of protocol-related values. 0x12 = sha2-256

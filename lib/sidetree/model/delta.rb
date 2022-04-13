@@ -12,7 +12,7 @@ module Sidetree
       end
 
       def self.parse(object)
-        Sidetree::OP::Validator.validate_delta!(object)
+        Sidetree::Validator.validate_delta!(object)
         Delta.new(object[:patches], object[:updateCommitment])
       end
 

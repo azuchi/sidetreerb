@@ -98,9 +98,12 @@ RSpec.describe Sidetree::DID do
     end
 
     context 'testnet' do
+      let(:recovery_key) { Sidetree::Key.generate }
+      let(:update_key) { recovery_key }
+      let(:document) { Sidetree::Model::Document.new }
       before { Sidetree::Params.network = Sidetree::Params::Network::TESTNET }
       after { Sidetree::Params.network = nil }
-      it 'include network segment as "test" in DID if SDK network testnet.' do
+      it 'include network segment as "test" in DID.' do
         expect(subject.start_with?('did:ion:test:')).to be true
       end
     end

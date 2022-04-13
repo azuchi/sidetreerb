@@ -32,7 +32,6 @@ module Sidetree
       end
     end
 
-    autoload :Validator, 'sidetree/op/validator'
     autoload :Base, 'sidetree/op/base'
     autoload :Create, 'sidetree/op/create'
 

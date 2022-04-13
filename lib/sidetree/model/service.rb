@@ -10,12 +10,12 @@ module Sidetree
 
       # @raise [Sidetree::Error]
       def initialize(id, type, endpoint)
-        Sidetree::OP::Validator.validate_id!(id)
+        Sidetree::Validator.validate_id!(id)
         raise Error, 'type should be String.' unless type.is_a?(String)
         raise Error, "Service endpoint type length #{type.length} exceeds max allowed length of #{MAX_TYPE_LENGTH}." if type.length > MAX_TYPE_LENGTH
         raise Error, 'Service endpoint value cannot be an array.' if endpoint.is_a?(Array)
 
-        Sidetree::OP::Validator.validate_uri!(endpoint) if endpoint.is_a?(String)
+        Sidetree::Validator.validate_uri!(endpoint) if endpoint.is_a?(String)
         @id = id
         @type = type
         @endpoint = endpoint

@@ -2,7 +2,7 @@ module Sidetree
 
   class Key
 
-    attr_accessor :private_key, :public_key, :id, :purposes, :type
+    attr_reader :private_key, :public_key, :id, :purposes, :type
 
     # @param [Integer] private_key private key.
     # @param [ECDSA::Point] public_key public key
@@ -32,7 +32,7 @@ module Sidetree
         raise Error, "Unknown purpose '#{purpose}' specified." if purpose && !Sidetree::OP::PublicKeyPurpose.values.include?(purpose)
       end
 
-      Sidetree::OP::Validator.validate_id!(id) if id
+      Sidetree::Validator.validate_id!(id) if id
 
       @purposes = purposes
       @id = id

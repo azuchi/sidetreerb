@@ -14,7 +14,7 @@ module Sidetree
       # @return [Sidetree::Model::Suffix]
       # @raise [Sidetree::Error]
       def self.parse(object)
-        Sidetree::OP::Validator.validate_suffix_data!(object)
+        Sidetree::Validator.validate_suffix_data!(object)
         Suffix.new(object[:deltaHash], object[:recoveryCommitment])
       end
 
