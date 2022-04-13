@@ -22,8 +22,23 @@ module Sidetree
     HASH_ALGORITH_STRING = 'sha2-256'
     # Maximum canonicalized operation delta buffer size.
     MAX_DELTA_SIZE = 1000
-
+    # Default DID method
     DEFAULT_METHOD = 'sidetree'
+
+    @network = nil
+
+    def self.network=(network)
+      @network = network
+    end
+
+    def self.network
+      @network
+    end
+
+    module Network
+      MAINNET = 'mainnet'
+      TESTNET = 'test'
+    end
   end
 
   module_function
