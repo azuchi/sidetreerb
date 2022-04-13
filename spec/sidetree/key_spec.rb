@@ -44,5 +44,49 @@ RSpec.describe Sidetree::Key do
         expect(subject.purposes).to eq(%w[authentication keyAgreement])
       end
     end
+
+    context 'Unsupported curve' do
+      let(:data) do
+        data = fixture_file('inputs/jwkEs256k1Public.json')
+        data['crv'] = 'wrongValue'
+        data
+      end
+      it 'raise error' do
+        expect {subject}.to raise_error(Sidetree::Error, 'Unsupported curve \'wrongValue\' specified.')
+      end
+    end
+
+    context 'Unsupported key type' do
+      let(:data) do
+        data = fixture_file('inputs/jwkEs256k1Public.json')
+        data['kty'] = 'wrongValue'
+        data
+      end
+      it 'raise error' do
+        expect {subject}.to raise_error(Sidetree::Error, 'Unsupported key type \'wrongValue\' specified.')
+      end
+    end
+
+    context 'Invalid x length' do
+      let(:data) do
+        data = fixture_file('inputs/jwkEs256k1Public.json')
+        data['x'] = 'wrongValueLength'
+        data
+      end
+      it 'raise error' do
+        expect {subject}.to raise_error(Sidetree::Error, 'Secp256k1 JWK \'x\' property must be 43 bytes.')
+      end
+    end
+
+    context 'Invalid y length' do
+      let(:data) do
+        data = fixture_file('inputs/jwkEs256k1Public.json')
+        data['y'] = 'wrongValueLength'
+        data
+      end
+      it 'raise error' do
+        expect {subject}.to raise_error(Sidetree::Error, 'Secp256k1 JWK \'y\' property must be 43 bytes.')
+      end
+    end
   end
 end

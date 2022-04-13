@@ -62,6 +62,10 @@ module Sidetree
       raise Error, 'x property required.' unless key_data['x']
       raise Error, 'y property required.' unless key_data['y']
 
+      # `x` and `y` need 43 Base64URL encoded bytes to contain 256 bits.
+      raise Error, "Secp256k1 JWK 'x' property must be 43 bytes." unless key_data['x'].length == 43
+      raise Error, "Secp256k1 JWK 'y' property must be 43 bytes." unless key_data['y'].length == 43
+
       x = Base64.urlsafe_decode64(key_data['x'])
       y = Base64.urlsafe_decode64(key_data['y'])
       point = ECDSA::Format::PointOctetString.decode(['04'].pack('H*') + x + y, ECDSA::Group::Secp256k1)
