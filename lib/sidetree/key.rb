@@ -6,6 +6,9 @@ module Sidetree
 
     # @param [Integer] private_key private key.
     # @param [ECDSA::Point] public_key public key
+    # @param [String] id
+    # @param [Array[String]] purposes
+    # @param [String] type
     def initialize(private_key: nil, public_key: nil, id: nil, purposes: [], type: nil)
       if private_key
         raise Error, 'private key is invalid range.' unless Key.valid_private_key?(private_key)
@@ -29,6 +32,8 @@ module Sidetree
         raise Error, "Unknown purpose '#{purpose}' specified." if purpose && !Sidetree::OP::PublicKeyPurpose.values.include?(purpose)
       end
 
+      Sidetree::OP::Validator.validate_id!(id) if id
+
       @purposes = purposes
       @id = id
       @type = type
@@ -45,25 +50,25 @@ module Sidetree
     end
 
     # Generate key instance from jwk Hash.
-    # @param [Hash] json jwk Hash object.
+    # @param [Hash] data jwk Hash object.
     # @return [Sidetree::Key]
     # @raise [Sidetree::Error]
-    def self.from_json(json)
-      key_json = json['publicKeyJwk'] ? json['publicKeyJwk'] : json
-      key_type = key_json['kty']
-      curve = key_json['crv']
+    def self.from_hash(data)
+      key_data = data['publicKeyJwk'] ? data['publicKeyJwk'] : data
+      key_type = key_data['kty']
+      curve = key_data['crv']
       raise Error, "Unsupported key type '#{key_type}' specified." if key_type.nil? || key_type != 'EC'
       raise Error, "Unsupported curve '#{curve}' specified." if curve.nil? || curve != 'secp256k1'
-      raise Error, 'x property required.' unless key_json['x']
-      raise Error, 'y property required.' unless key_json['y']
+      raise Error, 'x property required.' unless key_data['x']
+      raise Error, 'y property required.' unless key_data['y']
 
-      x = Base64.urlsafe_decode64(key_json['x'])
-      y = Base64.urlsafe_decode64(key_json['y'])
+      x = Base64.urlsafe_decode64(key_data['x'])
+      y = Base64.urlsafe_decode64(key_data['y'])
       point = ECDSA::Format::PointOctetString.decode(['04'].pack('H*') + x + y, ECDSA::Group::Secp256k1)
-      private_key = key_json['d'] ? Base64.urlsafe_decode64(key_json['d']).unpack1('H*').to_i(16) : nil
+      private_key = key_data['d'] ? Base64.urlsafe_decode64(key_data['d']).unpack1('H*').to_i(16) : nil
 
-      purposes = json['purposes'] ? json['purposes'] : []
-      Key.new(public_key: point, private_key: private_key, purposes: purposes, id: json['id'], type: json['type'])
+      purposes = data['purposes'] ? data['purposes'] : []
+      Key.new(public_key: point, private_key: private_key, purposes: purposes, id: data['id'], type: data['type'])
     end
 
     # Check whether private is valid range.
@@ -76,12 +81,32 @@ module Sidetree
     # Generate JSON::JWK object.
     # @return [JSON::JWK]
     def to_jwk
-      JSON::JWK.new(
+      jwk = JSON::JWK.new(
         kty: 'EC',
         crv: 'secp256k1',
         x: Base64.urlsafe_encode64(ECDSA::Format::FieldElementOctetString.encode(public_key.x, public_key.group.field), padding: false),
         y: Base64.urlsafe_encode64(ECDSA::Format::FieldElementOctetString.encode(public_key.y, public_key.group.field), padding: false)
       )
+      jwk['d'] = Base64.urlsafe_encode64([private_key.to_s(16).rjust(32 * 2, '0')].pack('H*')) if private_key
+      jwk
+    end
+
+    # Generate commitment for this key.
+    # @return [String] Base64 encoded commitment.
+    def to_commitment
+      digest = Digest::SHA256.digest(to_jwk.normalize.to_json_c14n)
+      # Digest::SHA256.digest(to_jwk.normalize.to_json_c14n)
+      Sidetree.to_hash(digest)
+    end
+
+    def to_h
+      h = {
+        publicKeyJwk: to_jwk.normalize,
+        purposes: purposes
+      }
+      h[:id] = id if id
+      h[:type] = type if type
+      h.stringify_keys
     end
 
   end

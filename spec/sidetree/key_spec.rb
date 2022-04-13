@@ -13,7 +13,7 @@ RSpec.describe Sidetree::Key do
   end
 
   describe '#from_json' do
-    subject { Sidetree::Key.from_json(data) }
+    subject { Sidetree::Key.from_hash(data) }
     context 'has only public key' do
       let(:data) { fixture_file('inputs/jwkEs256k1Public.json') }
       it 'generate Key instance' do

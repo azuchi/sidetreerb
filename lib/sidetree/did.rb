@@ -16,6 +16,24 @@ module Sidetree
       end
     end
 
+    # Create DID from +document+, +update_key+ and +recovery_key+.
+    # @param [Sidetree::Model::Document] document
+    # @param [Sidetree::Key] update_key update key
+    # @param [Sidetree::Key] recovery_key recovery key
+    # @param [String] method DID method, default value is sidetree.
+    # @raise [Sidetree::Error]
+    # @return [String] Long-Form DID
+    def self.create(document, update_key, recovery_key, method: 'sidetree')
+      raise Error, 'document must be Sidetree::Model::Document instance.' unless document.is_a?(Sidetree::Model::Document)
+      raise Error, 'update_key must be Sidetree::Key instance.' unless update_key.is_a?(Sidetree::Key)
+      raise Error, 'recovery_key must be Sidetree::Key instance.' unless recovery_key.is_a?(Sidetree::Key)
+
+      patches = [{'action': OP::PatchAction::REPLACE, 'document': document.to_h}]
+      delta = Model::Delta.new(patches, update_key.to_commitment)
+      suffix = Sidetree::Model::Suffix.new(delta.to_hash, recovery_key.to_commitment)
+      OP::Create.new(suffix, delta).did(method: method, include_long: true)
+    end
+
     def short_form?
       long_suffix.nil?
     end

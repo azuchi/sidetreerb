@@ -5,6 +5,8 @@ module Sidetree
 
       attr_reader :suffix, :delta
 
+      # @param [Sidetree::Model::Suffix] suffix
+      # @param [Sidetree::Model::Delta] delta
       def initialize(suffix, delta)
         @delta = delta
         @suffix = suffix
@@ -35,6 +37,25 @@ module Sidetree
         end
       end
 
+      def to_h
+        {suffixData: suffix.to_h, delta: delta.to_h}
+      end
+
+      # Generate long_suffix for DID.
+      # @return [String] Base64 encoded long_suffix.
+      def long_suffix
+        Base64.urlsafe_encode64(to_h.to_json_c14n, padding: false)
+      end
+
+      # Generate DID
+      # @param [String] method DID method.
+      # @param [Boolean] include_long
+      # @return [String] DID
+      def did(method: 'sidetree', include_long: false)
+        did = "did:#{method}:#{suffix.unique_suffix}"
+        did += ":#{long_suffix}" if include_long
+        did
+      end
     end
   end
 end

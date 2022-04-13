@@ -1,4 +1,3 @@
-require 'uri'
 require 'multihashes'
 
 module Sidetree
@@ -126,11 +125,7 @@ module Sidetree
 
           endpoint = service[:serviceEndpoint]
           if endpoint.instance_of?(String)
-            begin
-              URI.parse(endpoint)
-            rescue
-              raise Error, "Service endpoint string '#{endpoint}' is not a valid URI."
-            end
+            validate_uri!(endpoint)
           elsif endpoint.instance_of?(Hash)
           else
             raise Error, 'ServiceEndpoint must be string or object.'
@@ -140,6 +135,17 @@ module Sidetree
 
       def valid_base64_encoding?(base64)
         /^[A-Za-z0-9_-]+$/.match?(base64)
+      end
+
+      # Validate uri
+      # @param [String] uri uri
+      # @return [Sidetree::Error] Occurs if it is an incorrect URI
+      def validate_uri!(uri)
+        begin
+          URI.parse(uri)
+        rescue
+          raise Error, "URI string '#{uri}' is not a valid URI."
+        end
       end
 
       def validate_id!(id)

@@ -3,6 +3,9 @@ module Sidetree
     class Delta
       attr_reader :patches, :update_commitment
 
+      # @param [Array[Hash]] patches
+      # @param [String] update_commitment
+      # @raise [Sidetree::Error]
       def initialize(patches, update_commitment)
         @patches = patches
         @update_commitment = update_commitment
