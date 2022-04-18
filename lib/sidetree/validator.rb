@@ -140,6 +140,9 @@ module Sidetree
     def validate_uri!(uri)
       begin
         URI.parse(uri)
+        unless uri =~ /\A#{URI::regexp(%w[http https])}\z/
+          raise Error, "URI string '#{uri}' is not a valid URI."
+        end
       rescue
         raise Error, "URI string '#{uri}' is not a valid URI."
       end
