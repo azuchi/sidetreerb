@@ -9,9 +9,15 @@ module Sidetree
       if !did.start_with?('did:ion:') && !did.start_with?('did:sidetree:')
         raise Error, 'Expected DID method not given in DID.'
       end
-      raise Error, 'Unsupported DID format.' if did.count(':') > 3
+      if did.count(':') > (Sidetree::Params.testnet? ? 4 : 3)
+        raise Error, 'Unsupported DID format.'
+      end
+      if Sidetree::Params.testnet?
+        _, @method, _, @suffix, @long_suffix = did.split(':')
+      else
+        _, @method, @suffix, @long_suffix = did.split(':')
+      end
 
-      _, @method, @suffix, @long_suffix = did.split(':')
       if @long_suffix
         unless suffix == create_op.suffix.unique_suffix
           raise Error, 'DID document mismatches short-form DID.'
@@ -25,7 +31,7 @@ module Sidetree
     # @param [Sidetree::Key] recovery_key recovery key
     # @param [String] method DID method, default value is sidetree.
     # @raise [Sidetree::Error]
-    # @return [String] Long-Form DID
+    # @return [Sidetree::DID]
     def self.create(
       document,
       update_key,
@@ -48,7 +54,9 @@ module Sidetree
       delta = Model::Delta.new(patches, update_key.to_commitment)
       suffix =
         Sidetree::Model::Suffix.new(delta.to_hash, recovery_key.to_commitment)
-      OP::Create.new(suffix, delta).did(method: method, include_long: true)
+      DID.new(
+        OP::Create.new(suffix, delta).did(method: method, include_long: true)
+      )
     end
 
     def short_form?
@@ -61,6 +69,16 @@ module Sidetree
 
     def create_op
       long_form? ? OP::Create.from_base64(@long_suffix) : nil
+    end
+
+    # Return DID string.
+    # @return [String]
+    def to_s
+      did = "did:#{method}"
+      did += ":#{Sidetree::Params.network}" if Sidetree::Params.testnet?
+      did += ":#{suffix}"
+      did += ":#{long_suffix}" if long_form?
+      did
     end
   end
 end

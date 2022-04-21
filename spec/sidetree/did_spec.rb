@@ -136,7 +136,12 @@ RSpec.describe Sidetree::DID do
       Sidetree::Model::Document.new(public_keys: [key], services: [service])
     end
     subject do
-      Sidetree::DID.create(document, update_key, recovery_key, method: 'ion')
+      Sidetree::DID.create(
+        document,
+        update_key,
+        recovery_key,
+        method: Sidetree::Params::METHODS[:ion]
+      ).to_s
     end
     it 'generate DID using document, update key and recovery key' do
       expect(subject).to eq(

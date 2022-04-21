@@ -116,14 +116,16 @@ module Sidetree
         if public_key[:publicKeyJwk].instance_of?(Array)
           raise Error, 'publicKeyJwk object cannot be an array.'
         end
-        unless public_key[:type] == 'string'
+        unless public_key[:type].is_a?(String)
           raise Error, "Public key type #{public_key[:type]} is incorrect."
         end
 
         validate_id!(public_key[:id])
 
-        raise Error, 'Public key id is duplicated.' if pubkey_ids.include?(id)
-        pubkey_ids << id
+        if pubkey_ids.include?(public_key[:id])
+          raise Error, 'Public key id is duplicated.'
+        end
+        pubkey_ids << public_key[:id]
 
         if public_key[:purposes]
           unless public_key[:purposes].instance_of?(Array)
@@ -133,7 +135,7 @@ module Sidetree
             raise Error, 'purpose is duplicated.'
           end
           public_key[:purposes].each do |purpose|
-            unless PublicKeyPurpose.values.include?(purpose)
+            unless OP::PublicKeyPurpose.values.include?(purpose)
               raise Error, "purpose #{} is invalid."
             end
           end
@@ -159,7 +161,7 @@ module Sidetree
         end
         service_ids << service[:id]
 
-        unless service[:type] == 'string'
+        unless service[:type].is_a?(String)
           raise Error, "Service type #{service[:type]} is incorrect."
         end
         raise Error, 'Service type too long.' if service[:type].length > 30

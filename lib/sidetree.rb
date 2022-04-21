@@ -30,6 +30,9 @@ module Sidetree
     # Default DID method
     DEFAULT_METHOD = 'sidetree'
 
+    # Supported did methods.
+    METHODS = { default: DEFAULT_METHOD, ion: 'ion' }
+
     @network = nil
 
     def self.network=(network)
@@ -38,6 +41,10 @@ module Sidetree
 
     def self.network
       @network
+    end
+
+    def self.testnet?
+      @network == Network::TESTNET
     end
 
     module Network
