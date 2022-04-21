@@ -1,6 +1,5 @@
 module Sidetree
   module OP
-
     module Type
       CREATE = 'create'
       UPDATE = 'update'
@@ -28,12 +27,11 @@ module Sidetree
       module_function
 
       def values
-        PublicKeyPurpose.constants.map {|c| PublicKeyPurpose.const_get(c)}
+        PublicKeyPurpose.constants.map { |c| PublicKeyPurpose.const_get(c) }
       end
     end
 
     autoload :Base, 'sidetree/op/base'
     autoload :Create, 'sidetree/op/create'
-
   end
 end

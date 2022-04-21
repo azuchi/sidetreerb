@@ -17,7 +17,7 @@ module Sidetree
       end
 
       def to_h
-        {patches: patches, updateCommitment: update_commitment}
+        { patches: patches, updateCommitment: update_commitment }
       end
 
       def to_hash

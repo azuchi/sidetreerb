@@ -2,7 +2,6 @@ module Sidetree
   module OP
     # Create operation class.
     class Create < Base
-
       attr_reader :suffix, :delta
 
       # @param [Sidetree::Model::Suffix] suffix
@@ -27,18 +26,25 @@ module Sidetree
         jcs = Base64.urlsafe_decode64(base64_str)
         begin
           json = JSON.parse(jcs, symbolize_names: true)
-          # validate jcs
-          expected_base64 = Base64.urlsafe_encode64(json.to_json_c14n, padding: false)
-          raise Error, 'Initial state object and JCS string mismatch.' unless expected_base64 == base64_str
 
-          Create.new(Sidetree::Model::Suffix.parse(json[:suffixData]), Sidetree::Model::Delta.parse(json[:delta]))
+          # validate jcs
+          expected_base64 =
+            Base64.urlsafe_encode64(json.to_json_c14n, padding: false)
+          unless expected_base64 == base64_str
+            raise Error, 'Initial state object and JCS string mismatch.'
+          end
+
+          Create.new(
+            Sidetree::Model::Suffix.parse(json[:suffixData]),
+            Sidetree::Model::Delta.parse(json[:delta])
+          )
         rescue JSON::ParserError
           raise Error, 'Long form initial state should be encoded jcs.'
         end
       end
 
       def to_h
-        {suffixData: suffix.to_h, delta: delta.to_h}
+        { suffixData: suffix.to_h, delta: delta.to_h }
       end
 
       # Generate long_suffix for DID.
@@ -53,7 +59,8 @@ module Sidetree
       # @return [String] DID
       def did(method: Sidetree::Params::DEFAULT_METHOD, include_long: false)
         did = "did:#{method}"
-        did += ":#{Sidetree::Params.network}" if Sidetree::Params.network == Sidetree::Params::Network::TESTNET
+        did += ":#{Sidetree::Params.network}" if Sidetree::Params.network ==
+          Sidetree::Params::Network::TESTNET
         did += ":#{suffix.unique_suffix}"
         did += ":#{long_suffix}" if include_long
         did

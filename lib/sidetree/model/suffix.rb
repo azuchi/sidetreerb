@@ -21,7 +21,7 @@ module Sidetree
       # Convert data to Hash object.
       # @return [Hash]
       def to_h
-        {deltaHash: delta_hash, recoveryCommitment: recovery_commitment}
+        { deltaHash: delta_hash, recoveryCommitment: recovery_commitment }
       end
 
       # Calculate unique suffix

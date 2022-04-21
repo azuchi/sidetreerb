@@ -1,0 +1,9 @@
+/bin
+/log
+/tmp
+/vendor
+Gemfile.lock
+*.txt
+/.idea/
+/.*
+/spec/fixtures/*
