@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+require 'thor'
+require 'sidetree'
+
+class ION < Thor
+  class << self
+    def exit_on_failure?
+      true
+    end
+  end
+
+  desc 'create', 'Create ION DID.'
+  def create
+    recovery_key = Sidetree::Key.generate
+    update_key = Sidetree::Key.generate
+    signing_key = Sidetree::Key.generate(id: 'signing-key')
+    document = Sidetree::Model::Document.new(public_keys: [signing_key])
+    did = Sidetree::DID.create(document, update_key, recovery_key, method: Sidetree::Params::METHODS[:ion])
+
+    puts "DID: #{did.short_form}"
+    puts
+    puts "Recovery key: #{recovery_key.encoded_private_key}"
+    puts "Update key: #{update_key.encoded_private_key}"
+    puts "Signing key: #{signing_key.encoded_private_key}"
+    puts
+
+    puts "Long-Form DID: #{did.to_s}"
+    op = did.create_op
+    puts "DID suffix data: #{op.suffix.to_h.to_json}"
+    puts "Document delta: #{op.delta.to_h.to_json}"
+  end
+end
+
+ION.start(ARGV)

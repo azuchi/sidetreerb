@@ -71,12 +71,19 @@ module Sidetree
       long_form? ? OP::Create.from_base64(@long_suffix) : nil
     end
 
-    # Return DID string.
+    # Return short form did.
     # @return [String]
-    def to_s
+    def short_form
       did = "did:#{method}"
       did += ":#{Sidetree::Params.network}" if Sidetree::Params.testnet?
       did += ":#{suffix}"
+      did
+    end
+
+    # Return DID string.
+    # @return [String]
+    def to_s
+      did = short_form
       did += ":#{long_suffix}" if long_form?
       did
     end

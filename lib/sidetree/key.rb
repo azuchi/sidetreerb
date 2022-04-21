@@ -146,10 +146,7 @@ module Sidetree
               padding: false
             )
         )
-      jwk['d'] =
-        Base64.urlsafe_encode64(
-          [private_key.to_s(16).rjust(32 * 2, '0')].pack('H*')
-        ) if private_key
+      jwk['d'] = encoded_private_key if private_key
       jwk
     end
 
@@ -167,6 +164,19 @@ module Sidetree
       h[:id] = id if id
       h[:type] = type if type
       h.stringify_keys
+    end
+
+    # Return base64 encoded private key.
+    # @return [String]
+    def encoded_private_key
+      if private_key
+        Base64.urlsafe_encode64(
+          [private_key.to_s(16).rjust(32 * 2, '0')].pack('H*'),
+          padding: false
+        )
+      else
+        nil
+      end
     end
   end
 end

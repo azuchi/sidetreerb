@@ -116,7 +116,7 @@ module Sidetree
         if public_key[:publicKeyJwk].instance_of?(Array)
           raise Error, 'publicKeyJwk object cannot be an array.'
         end
-        unless public_key[:type].is_a?(String)
+        if public_key[:type] && !public_key[:type].is_a?(String)
           raise Error, "Public key type #{public_key[:type]} is incorrect."
         end
 
