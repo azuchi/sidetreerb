@@ -155,7 +155,6 @@ module Sidetree
     def to_commitment
       digest = Digest::SHA256.digest(to_jwk.normalize.to_json_c14n)
 
-      # Digest::SHA256.digest(to_jwk.normalize.to_json_c14n)
       Sidetree.to_hash(digest)
     end
 
