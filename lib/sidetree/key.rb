@@ -16,14 +16,14 @@ module Sidetree
     )
       if private_key
         unless Key.valid_private_key?(private_key)
-          raise Error, 'private key is invalid range.'
+          raise Error, "private key is invalid range."
         end
 
         @private_key = private_key
         pub = ECDSA::Group::Secp256k1.generator.multiply_by_scalar(private_key)
         if public_key
           unless pub == public_key
-            raise Error, 'Public and private keys do not match.'
+            raise Error, "Public and private keys do not match."
           end
         else
           public_key = pub
@@ -31,13 +31,13 @@ module Sidetree
       end
 
       unless public_key
-        raise Error, 'Specify either the private key or the public key'
+        raise Error, "Specify either the private key or the public key"
       end
       unless public_key.is_a?(ECDSA::Point)
-        raise Error, 'public key must be an ECDSA::Point instance.'
+        raise Error, "public key must be an ECDSA::Point instance."
       end
       unless ECDSA::Group::Secp256k1.valid_public_key?(public_key)
-        raise Error, 'public key is invalid.'
+        raise Error, "public key is invalid."
       end
 
       @public_key = public_key
@@ -71,47 +71,47 @@ module Sidetree
     # @return [Sidetree::Key]
     # @raise [Sidetree::Error]
     def self.from_hash(data)
-      key_data = data['publicKeyJwk'] ? data['publicKeyJwk'] : data
-      key_type = key_data['kty']
-      curve = key_data['crv']
-      if key_type.nil? || key_type != 'EC'
+      key_data = data["publicKeyJwk"] ? data["publicKeyJwk"] : data
+      key_type = key_data["kty"]
+      curve = key_data["crv"]
+      if key_type.nil? || key_type != "EC"
         raise Error, "Unsupported key type '#{key_type}' specified."
       end
-      if curve.nil? || curve != 'secp256k1'
+      if curve.nil? || curve != "secp256k1"
         raise Error, "Unsupported curve '#{curve}' specified."
       end
-      raise Error, 'x property required.' unless key_data['x']
-      raise Error, 'y property required.' unless key_data['y']
+      raise Error, "x property required." unless key_data["x"]
+      raise Error, "y property required." unless key_data["y"]
 
       # `x` and `y` need 43 Base64URL encoded bytes to contain 256 bits.
-      unless key_data['x'].length == 43
+      unless key_data["x"].length == 43
         raise Error, "Secp256k1 JWK 'x' property must be 43 bytes."
       end
-      unless key_data['y'].length == 43
+      unless key_data["y"].length == 43
         raise Error, "Secp256k1 JWK 'y' property must be 43 bytes."
       end
 
-      x = Base64.urlsafe_decode64(key_data['x'])
-      y = Base64.urlsafe_decode64(key_data['y'])
+      x = Base64.urlsafe_decode64(key_data["x"])
+      y = Base64.urlsafe_decode64(key_data["y"])
       point =
         ECDSA::Format::PointOctetString.decode(
-          ['04'].pack('H*') + x + y,
+          ["04"].pack("H*") + x + y,
           ECDSA::Group::Secp256k1
         )
       private_key =
-        if key_data['d']
-          Base64.urlsafe_decode64(key_data['d']).unpack1('H*').to_i(16)
+        if key_data["d"]
+          Base64.urlsafe_decode64(key_data["d"]).unpack1("H*").to_i(16)
         else
           nil
         end
 
-      purposes = data['purposes'] ? data['purposes'] : []
+      purposes = data["purposes"] ? data["purposes"] : []
       Key.new(
         public_key: point,
         private_key: private_key,
         purposes: purposes,
-        id: data['id'],
-        type: data['type']
+        id: data["id"],
+        type: data["type"]
       )
     end
 
@@ -127,8 +127,8 @@ module Sidetree
     def to_jwk
       jwk =
         JSON::JWK.new(
-          kty: 'EC',
-          crv: 'secp256k1',
+          kty: "EC",
+          crv: "secp256k1",
           x:
             Base64.urlsafe_encode64(
               ECDSA::Format::FieldElementOctetString.encode(
@@ -146,7 +146,7 @@ module Sidetree
               padding: false
             )
         )
-      jwk['d'] = encoded_private_key if private_key
+      jwk["d"] = encoded_private_key if private_key
       jwk
     end
 
@@ -170,7 +170,7 @@ module Sidetree
     def encoded_private_key
       if private_key
         Base64.urlsafe_encode64(
-          [private_key.to_s(16).rjust(32 * 2, '0')].pack('H*'),
+          [private_key.to_s(16).rjust(32 * 2, "0")].pack("H*"),
           padding: false
         )
       else

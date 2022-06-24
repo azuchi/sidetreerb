@@ -5,7 +5,7 @@ module Sidetree
     # @param [Hash] delta delta object.
     # @return [Sidetree::Error]
     def validate_delta!(delta)
-      raise Error, 'Delta does not defined.' unless delta
+      raise Error, "Delta does not defined." unless delta
       delta_size = delta.to_json_c14n.bytesize
       if delta_size > Sidetree::Params::MAX_DELTA_SIZE
         raise Error,
@@ -13,7 +13,7 @@ module Sidetree
       end
 
       if delta.instance_of?(Array)
-        raise Error, 'Delta object cannot be an array.'
+        raise Error, "Delta object cannot be an array."
       end
       delta.keys.each do |k|
         unless %w[patches updateCommitment].include?(k.to_s)
@@ -22,11 +22,11 @@ module Sidetree
       end
 
       unless delta[:patches].instance_of?(Array)
-        raise Error, 'Patches object in delta must be an array.'
+        raise Error, "Patches object in delta must be an array."
       end
       delta[:patches].each { |p| validate_patch!(p) }
 
-      validate_encoded_multi_hash!(delta[:updateCommitment], 'updateCommitment')
+      validate_encoded_multi_hash!(delta[:updateCommitment], "updateCommitment")
     end
 
     # @param [Hash] patch patch object.
@@ -49,7 +49,7 @@ module Sidetree
     end
 
     def validate_document!(document)
-      raise Error, 'Document object missing in patch object' unless document
+      raise Error, "Document object missing in patch object" unless document
       document.keys.each do |k|
         unless %w[publicKeys services].include?(k.to_s)
           raise Error, "Property '#{k}' is not allowed in document object."
@@ -61,7 +61,7 @@ module Sidetree
 
     def validate_add_public_keys_patch!(patch)
       unless patch.keys.length == 2
-        raise Error, 'Patch missing or unknown property.'
+        raise Error, "Patch missing or unknown property."
       end
       validate_public_keys!(patch[:publicKeys])
     end
@@ -73,7 +73,7 @@ module Sidetree
         end
       end
       unless patch[:ids].instance_of?(Array)
-        raise Error, 'Patch public key ids not an array.'
+        raise Error, "Patch public key ids not an array."
       end
 
       patch[:ids].each { |id| validate_id!(id) }
@@ -81,10 +81,10 @@ module Sidetree
 
     def validate_add_services_patch!(patch)
       unless patch.keys.length == 2
-        raise Error, 'Patch missing or unknown property.'
+        raise Error, "Patch missing or unknown property."
       end
       unless patch[:services].instance_of?(Array)
-        raise Error, 'Patch services not an array.'
+        raise Error, "Patch services not an array."
       end
       validate_services!(patch[:services])
     end
@@ -96,7 +96,7 @@ module Sidetree
         end
       end
       unless patch[:ids].instance_of?(Array)
-        raise Error, 'Patch service ids not an array.'
+        raise Error, "Patch service ids not an array."
       end
 
       patch[:ids].each { |id| validate_id!(id) }
@@ -104,7 +104,7 @@ module Sidetree
 
     def validate_public_keys!(public_keys)
       unless public_keys.instance_of?(Array)
-        raise Error, 'publicKeys must be an array.'
+        raise Error, "publicKeys must be an array."
       end
       pubkey_ids = []
       public_keys.each do |public_key|
@@ -114,7 +114,7 @@ module Sidetree
           end
         end
         if public_key[:publicKeyJwk].instance_of?(Array)
-          raise Error, 'publicKeyJwk object cannot be an array.'
+          raise Error, "publicKeyJwk object cannot be an array."
         end
         if public_key[:type] && !public_key[:type].is_a?(String)
           raise Error, "Public key type #{public_key[:type]} is incorrect."
@@ -123,16 +123,16 @@ module Sidetree
         validate_id!(public_key[:id])
 
         if pubkey_ids.include?(public_key[:id])
-          raise Error, 'Public key id is duplicated.'
+          raise Error, "Public key id is duplicated."
         end
         pubkey_ids << public_key[:id]
 
         if public_key[:purposes]
           unless public_key[:purposes].instance_of?(Array)
-            raise Error, 'purposes must be an array.'
+            raise Error, "purposes must be an array."
           end
           unless public_key[:purposes].count == public_key[:purposes].uniq.count
-            raise Error, 'purpose is duplicated.'
+            raise Error, "purpose is duplicated."
           end
           public_key[:purposes].each do |purpose|
             unless OP::PublicKeyPurpose.values.include?(purpose)
@@ -145,34 +145,33 @@ module Sidetree
 
     def validate_services!(services)
       unless services.instance_of?(Array)
-        raise Error, 'services must be an array.'
+        raise Error, "services must be an array."
       end
 
       service_ids = []
       services.each do |service|
         unless service.keys.length == 3
-          raise Error, 'Service has missing or unknown property.'
+          raise Error, "Service has missing or unknown property."
         end
 
         validate_id!(service[:id])
 
         if service_ids.include?(service[:id])
-          raise Error, 'Service id has to be unique.'
+          raise Error, "Service id has to be unique."
         end
         service_ids << service[:id]
 
         unless service[:type].is_a?(String)
           raise Error, "Service type #{service[:type]} is incorrect."
         end
-        raise Error, 'Service type too long.' if service[:type].length > 30
+        raise Error, "Service type too long." if service[:type].length > 30
 
         endpoint = service[:serviceEndpoint]
         if endpoint.instance_of?(String)
           validate_uri!(endpoint)
         elsif endpoint.instance_of?(Hash)
-
         else
-          raise Error, 'ServiceEndpoint must be string or object.'
+          raise Error, "ServiceEndpoint must be string or object."
         end
       end
     end
@@ -196,10 +195,10 @@ module Sidetree
     end
 
     def validate_id!(id)
-      raise Error, 'id does not string.' unless id.instance_of?(String)
-      raise Error, 'id is too long.' if id.length > 50
+      raise Error, "id does not string." unless id.instance_of?(String)
+      raise Error, "id is too long." if id.length > 50
       unless valid_base64_encoding?(id)
-        raise Error, 'id does not use base64url character set.'
+        raise Error, "id does not use base64url character set."
       end
     end
 
@@ -218,7 +217,7 @@ module Sidetree
 
     def validate_did_type!(type)
       return unless type
-      raise Error, 'DID type must be a string.' unless type.instance_of?(String)
+      raise Error, "DID type must be a string." unless type.instance_of?(String)
       if type.length > 4
         raise Error,
               "DID type string '#{type}' cannot be longer than 4 characters."
@@ -231,19 +230,19 @@ module Sidetree
 
     def validate_suffix_data!(suffix)
       if suffix.instance_of?(Array)
-        raise Error, 'Suffix data can not be an array.'
+        raise Error, "Suffix data can not be an array."
       end
       suffix.keys.each do |k|
         unless %w[deltaHash recoveryCommitment type].include?(k.to_s)
           raise Error, "Property '#{k}' is not allowed in publicKeys object."
         end
       end
-      validate_encoded_multi_hash!(suffix[:deltaHash], 'delta hash')
+      validate_encoded_multi_hash!(suffix[:deltaHash], "delta hash")
       validate_encoded_multi_hash!(
         suffix[:recoveryCommitment],
-        'recovery commitment'
+        "recovery commitment"
       )
-      validate_encoded_multi_hash!(suffix[:deltaHash], 'delta hash')
+      validate_encoded_multi_hash!(suffix[:deltaHash], "delta hash")
       validate_did_type!(suffix[:type])
     end
   end

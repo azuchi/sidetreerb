@@ -6,21 +6,21 @@ module Sidetree
 
     # @raise [Sidetree::Error]
     def initialize(did)
-      if !did.start_with?('did:ion:') && !did.start_with?('did:sidetree:')
-        raise Error, 'Expected DID method not given in DID.'
+      if !did.start_with?("did:ion:") && !did.start_with?("did:sidetree:")
+        raise Error, "Expected DID method not given in DID."
       end
-      if did.count(':') > (Sidetree::Params.testnet? ? 4 : 3)
-        raise Error, 'Unsupported DID format.'
+      if did.count(":") > (Sidetree::Params.testnet? ? 4 : 3)
+        raise Error, "Unsupported DID format."
       end
       if Sidetree::Params.testnet?
-        _, @method, _, @suffix, @long_suffix = did.split(':')
+        _, @method, _, @suffix, @long_suffix = did.split(":")
       else
-        _, @method, @suffix, @long_suffix = did.split(':')
+        _, @method, @suffix, @long_suffix = did.split(":")
       end
 
       if @long_suffix
         unless suffix == create_op.suffix.unique_suffix
-          raise Error, 'DID document mismatches short-form DID.'
+          raise Error, "DID document mismatches short-form DID."
         end
       end
     end
@@ -39,18 +39,16 @@ module Sidetree
       method: Sidetree::Params::DEFAULT_METHOD
     )
       unless document.is_a?(Sidetree::Model::Document)
-        raise Error, 'document must be Sidetree::Model::Document instance.'
+        raise Error, "document must be Sidetree::Model::Document instance."
       end
       unless update_key.is_a?(Sidetree::Key)
-        raise Error, 'update_key must be Sidetree::Key instance.'
+        raise Error, "update_key must be Sidetree::Key instance."
       end
       unless recovery_key.is_a?(Sidetree::Key)
-        raise Error, 'recovery_key must be Sidetree::Key instance.'
+        raise Error, "recovery_key must be Sidetree::Key instance."
       end
 
-      patches = [
-        { 'action': OP::PatchAction::REPLACE, 'document': document.to_h }
-      ]
+      patches = [{ action: OP::PatchAction::REPLACE, document: document.to_h }]
       delta = Model::Delta.new(patches, update_key.to_commitment)
       suffix =
         Sidetree::Model::Suffix.new(delta.to_hash, recovery_key.to_commitment)

@@ -31,7 +31,7 @@ module Sidetree
           expected_base64 =
             Base64.urlsafe_encode64(json.to_json_c14n, padding: false)
           unless expected_base64 == base64_str
-            raise Error, 'Initial state object and JCS string mismatch.'
+            raise Error, "Initial state object and JCS string mismatch."
           end
 
           Create.new(
@@ -39,7 +39,7 @@ module Sidetree
             Sidetree::Model::Delta.parse(json[:delta])
           )
         rescue JSON::ParserError
-          raise Error, 'Long form initial state should be encoded jcs.'
+          raise Error, "Long form initial state should be encoded jcs."
         end
       end
 

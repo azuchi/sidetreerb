@@ -10,13 +10,13 @@ module Sidetree
       # @raise [Sidetree::Error]
       def initialize(id, type, endpoint)
         Sidetree::Validator.validate_id!(id)
-        raise Error, 'type should be String.' unless type.is_a?(String)
+        raise Error, "type should be String." unless type.is_a?(String)
         if type.length > MAX_TYPE_LENGTH
           raise Error,
                 "Service endpoint type length #{type.length} exceeds max allowed length of #{MAX_TYPE_LENGTH}."
         end
         if endpoint.is_a?(Array)
-          raise Error, 'Service endpoint value cannot be an array.'
+          raise Error, "Service endpoint value cannot be an array."
         end
 
         Sidetree::Validator.validate_uri!(endpoint) if endpoint.is_a?(String)
@@ -33,16 +33,16 @@ module Sidetree
       # @raise [Sidetree::Error]
       # @return [Sidetree::Model::Service]
       def self.from_hash(data)
-        Service.new(data['id'], data['type'], data['serviceEndpoint'])
+        Service.new(data["id"], data["type"], data["serviceEndpoint"])
       end
 
       # Convert data to Hash object.
       # @return [Hash]
       def to_h
         hash = {}
-        hash['id'] = id if id
-        hash['type'] = type if type
-        hash['serviceEndpoint'] = endpoint if endpoint
+        hash["id"] = id if id
+        hash["type"] = type if type
+        hash["serviceEndpoint"] = endpoint if endpoint
         hash
       end
     end

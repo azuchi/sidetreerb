@@ -1,37 +1,37 @@
 # frozen_string_literal: true
 
-require_relative 'sidetree/version'
-require 'ecdsa'
-require 'json/jwt'
-require 'base64'
-require 'json'
-require 'json/canonicalization'
-require 'uri'
-require 'multihashes'
+require_relative "sidetree/version"
+require "ecdsa"
+require "json/jwt"
+require "base64"
+require "json"
+require "json/canonicalization"
+require "uri"
+require "multihashes"
 
 module Sidetree
   class Error < StandardError
   end
 
-  autoload :Key, 'sidetree/key'
-  autoload :DID, 'sidetree/did'
-  autoload :Model, 'sidetree/model'
-  autoload :OP, 'sidetree/op'
-  autoload :Validator, 'sidetree/validator'
+  autoload :Key, "sidetree/key"
+  autoload :DID, "sidetree/did"
+  autoload :Model, "sidetree/model"
+  autoload :OP, "sidetree/op"
+  autoload :Validator, "sidetree/validator"
 
   module Params
     # Algorithm for generating hashes of protocol-related values. 0x12 = sha2-256
     HASH_ALGORITHM = [0x12]
-    HASH_ALGORITH_STRING = 'sha2-256'
+    HASH_ALGORITH_STRING = "sha2-256"
 
     # Maximum canonicalized operation delta buffer size.
     MAX_DELTA_SIZE = 1000
 
     # Default DID method
-    DEFAULT_METHOD = 'sidetree'
+    DEFAULT_METHOD = "sidetree"
 
     # Supported did methods.
-    METHODS = { default: DEFAULT_METHOD, ion: 'ion' }
+    METHODS = { default: DEFAULT_METHOD, ion: "ion" }
 
     @network = nil
 
@@ -48,8 +48,8 @@ module Sidetree
     end
 
     module Network
-      MAINNET = 'mainnet'
-      TESTNET = 'test'
+      MAINNET = "mainnet"
+      TESTNET = "test"
     end
   end
 
