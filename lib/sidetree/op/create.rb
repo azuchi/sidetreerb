@@ -2,6 +2,7 @@ module Sidetree
   module OP
     # Create operation class.
     class Create < Base
+
       attr_reader :suffix, :delta
 
       # @param [Sidetree::Model::Suffix] suffix
@@ -9,6 +10,18 @@ module Sidetree
       def initialize(suffix, delta)
         @delta = delta
         @suffix = suffix
+      end
+
+      # Generate create operation with new generate key.
+      # @param [String] method DID method defined in +Sidetree::Params::METHODS+.
+      # @return [Sidetree::OP::Create]
+      def self.generate(method: Sidetree::Params::METHODS[:ion])
+        recovery_key = Sidetree::Key.generate
+        update_key = Sidetree::Key.generate
+        signing_key = Sidetree::Key.generate(id: 'signing-key')
+        document = Sidetree::Model::Document.new(public_keys: [signing_key])
+        did = Sidetree::DID.create(document, update_key, recovery_key, method: method)
+        did.create_op
       end
 
       def type
