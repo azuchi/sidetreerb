@@ -27,6 +27,8 @@ module Sidetree
 
     # Maximum canonicalized operation delta buffer size.
     MAX_DELTA_SIZE = 1000
+    # Maximum compressed chunk file size. 10MB.
+    MAX_CHUNK_FILE_SIZE = 10_000_000
 
     # Default DID method
     DEFAULT_METHOD = "sidetree"
