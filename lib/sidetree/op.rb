@@ -34,6 +34,7 @@ module Sidetree
     autoload :Base, "sidetree/op/base"
     autoload :Create, "sidetree/op/create"
     autoload :Recover, "sidetree/op/recover"
+    autoload :Update, "sidetree/op/update"
     autoload :Deactivate, "sidetree/op/deactivate"
   end
 end
