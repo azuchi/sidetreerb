@@ -13,6 +13,7 @@ module Sidetree
   class Error < StandardError
   end
 
+  autoload :Util, "sidetree/util"
   autoload :Key, "sidetree/key"
   autoload :DID, "sidetree/did"
   autoload :Model, "sidetree/model"
