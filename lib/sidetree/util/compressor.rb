@@ -1,9 +1,8 @@
-require 'zlib'
+require "zlib"
 
 module Sidetree
   module Util
     module Compressor
-
       module_function
 
       # Compresses teh data in gzip and return it as buffer.
@@ -23,12 +22,12 @@ module Sidetree
       # @return [String] decompressed data.
       # @raise [Sidetree::Error] raise if data exceeds max_bytes size.
       def decompress(compressed, max_bytes: nil)
-        raise Sidetree::Error, 'Exceed maximum compressed chunk file size.' if max_bytes && compressed.bytesize > max_bytes
+        if max_bytes && compressed.bytesize > max_bytes
+          raise Sidetree::Error, "Exceed maximum compressed chunk file size."
+        end
         io = StringIO.new(compressed)
         result = StringIO.new
-        Zlib::GzipReader.wrap(io) do |gz|
-          result << gz.read
-        end
+        Zlib::GzipReader.wrap(io) { |gz| result << gz.read }
         result.string
       end
     end
