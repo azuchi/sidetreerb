@@ -10,12 +10,13 @@ RSpec.describe Sidetree::Model::ChunkFile do
     end
   end
 
+  let(:chunk_data) do
+    [
+      "1f8b08000000000000034d91614fc2301086ff4b3f0b6e1888f24de7c8a62202138d8698dadeb6b26ead6bb731c9febb2d089af4c3f5bdf79ede5d778802d758a1f1fb0e5592620d9ec873a67328341a239fddc44eb0880baa5d928f565befed2b1bb6aa50edfc4b45fcc3597ef72efdeb0f98065e83ce90c49aa470e061a299280ca504c9310193a6825407f40ec9ea9333720fedc1cda8712a9614ac488c68ccba95607b2054e1251039188e327705258b19c1166d6c03c7bdb2cf1e59774d66d9996e6da56752a4ac2df8586f94adb9cfe70f336fb8899ec8f38c66cdf476e96c7a577c01abc974eb10df8d491847af735287a6c2c2824715a572d6def341350aaa49f0b278f49f7cceebd584f446d9ab9fe8642336df3721ea6c47a5146abf09842b9d9aa17fbb363cac1494369e824e05b55d62893f1967ba0d8b5a9c8c7ff22d70488e7206ed755202ec57b9eed66766beb26604feaff2a084d41d5cfc2d53891c221b9e4afc824ac1f6bf9d6a2dd5f8fcbc699a7e55f23e1139ead69d39ebee07b0a336622a020000"
+    ].pack("H*")
+  end
+
   describe "#prase" do
-    let(:chunk_data) do
-      [
-        "1f8b08000000000000034d91614fc2301086ff4b3f0b6e1888f24de7c8a62202138d8698dadeb6b26ead6bb731c9febb2d089af4c3f5bdf79ede5d778802d758a1f1fb0e5592620d9ec873a67328341a239fddc44eb0880baa5d928f565befed2b1bb6aa50edfc4b45fcc3597ef72efdeb0f98065e83ce90c49aa470e061a299280ca504c9310193a6825407f40ec9ea9333720fedc1cda8712a9614ac488c68ccba95607b2054e1251039188e327705258b19c1166d6c03c7bdb2cf1e59774d66d9996e6da56752a4ac2df8586f94adb9cfe70f336fb8899ec8f38c66cdf476e96c7a577c01abc974eb10df8d491847af735287a6c2c2824715a572d6def341350aaa49f0b278f49f7cceebd584f446d9ab9fe8642336df3721ea6c47a5146abf09842b9d9aa17fbb363cac1494369e824e05b55d62893f1967ba0d8b5a9c8c7ff22d70488e7206ed755202ec57b9eed66766beb26604feaff2a084d41d5cfc2d53891c221b9e4afc824ac1f6bf9d6a2dd5f8fcbc699a7e55f23e1139ead69d39ebee07b0a336622a020000"
-      ].pack("H*")
-    end
     subject { described_class.parse(chunk_data) }
 
     it "generate ChunkFile instance" do
@@ -34,6 +35,15 @@ RSpec.describe Sidetree::Model::ChunkFile do
           "Unexpected property unexpectedProperty in chunk file."
         )
       end
+    end
+  end
+
+  describe "#to_compress" do
+    it "generate compressed data." do
+      uncompressed = described_class.parse(chunk_data)
+      compressed = uncompressed.to_compress
+      decompressed = described_class.parse(compressed)
+      expect(uncompressed).to eq(decompressed)
     end
   end
 end

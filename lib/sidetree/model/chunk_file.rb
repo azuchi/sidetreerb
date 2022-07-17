@@ -29,12 +29,12 @@ module Sidetree
       # @return [Sidetree::Model::ChunkFile]
       # @raise [Sidetree::Error]
       def self.parse(compressed)
-        uncompressed =
+        decompressed =
           Sidetree::Util::Compressor.decompress(
             compressed,
             max_bytes: Sidetree::Params::MAX_CHUNK_FILE_SIZE
           )
-        json = JSON.parse(uncompressed, symbolize_names: true)
+        json = JSON.parse(decompressed, symbolize_names: true)
         json.keys.each do |k|
           unless k == :deltas
             raise Sidetree::Error,
@@ -48,6 +48,20 @@ module Sidetree
         ChunkFile.new(
           json[:deltas].map { |delta| Sidetree::Model::Delta.parse(delta) }
         )
+      end
+
+      # Compress this chunk file
+      # @return [String] compressed data.
+      def to_compress
+        params = { deltas: deltas.map(&:to_h) }
+        Sidetree::Util::Compressor.compress(params.to_json)
+      end
+
+      # Check if the +other+ object have the same chunk data.
+      # @return [Boolean]
+      def ==(other)
+        return false unless other.is_a?(ChunkFile)
+        deltas == other.deltas
       end
     end
   end

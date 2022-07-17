@@ -23,6 +23,11 @@ module Sidetree
       def to_hash
         Sidetree.to_hash(to_h)
       end
+
+      def ==(other)
+        return false unless other.is_a?(Delta)
+        to_hash == other.to_hash
+      end
     end
   end
 end
