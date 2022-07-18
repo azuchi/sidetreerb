@@ -19,6 +19,7 @@ module Sidetree
   autoload :Model, "sidetree/model"
   autoload :OP, "sidetree/op"
   autoload :Validator, "sidetree/validator"
+  autoload :CAS, "sidetree/cas"
 
   module Params
     # Algorithm for generating hashes of protocol-related values. 0x12 = sha2-256
