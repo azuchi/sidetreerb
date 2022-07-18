@@ -22,11 +22,13 @@ RSpec.describe Sidetree::CAS::IPFS do
         chunk_file =
           Sidetree::Model::ChunkFile.create_from_ops(create_ops: [create_op])
         ipfs = described_class.new
-        expect(ipfs.write(chunk_file.to_compress)).to eq('QmcUeB9gvUWb5pq4qCsvnM6pbxSgETUvXmd9puVf3jpDXG')
+        expect(ipfs.write(chunk_file.to_compress)).to eq(
+          "QmcUeB9gvUWb5pq4qCsvnM6pbxSgETUvXmd9puVf3jpDXG"
+        )
         expect(WebMock).to have_requested(
-                             :post,
-                             "http://localhost:5001/api/v0/add"
-                           ).once
+          :post,
+          "http://localhost:5001/api/v0/add"
+        ).once
       end
     end
 
