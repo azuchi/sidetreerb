@@ -45,17 +45,21 @@ module Sidetree
 
       # Get content from IPFS.
       # @param [String] addr cas uri.
-      # @param [Integer] max_bytesize The maximum allowed size limit of the content.
       # @return [Sidetree::CAS::FetchResult] Fetch result containing the content if found.
       # The result code is set to FetchResultCode.MaxSizeExceeded if the content exceeds the +max_bytesize+.
-      def read(addr, max_bytesize: nil)
+      def read(addr)
         fetch_url = "#{base_url}/cat?arg=#{addr}"
-        fetch_url += "&length=#{max_bytesize + 1}" if max_bytesize
-        res = Net::HTTP.post_form(URI(fetch_url), {})
-        if res.is_a?(Net::HTTPSuccess)
-          FetchResult.new(FetchResult::CODE_SUCCESS, res.body)
-        else
-          FetchResult.new(FetchResult::CODE_INVALID_HASH, res.body)
+        begin
+          res = Net::HTTP.post_form(URI(fetch_url), {})
+          if res.is_a?(Net::HTTPSuccess)
+            FetchResult.new(FetchResult::CODE_SUCCESS, res.body)
+          else
+            FetchResult.new(FetchResult::CODE_NOT_FOUND)
+          end
+        rescue Errno::ECONNREFUSED
+          FetchResult.new(FetchResult::CODE_CAS_NOT_REACHABLE)
+        rescue StandardError
+          FetchResult.new(FetchResult::CODE_NOT_FOUND)
         end
       end
 

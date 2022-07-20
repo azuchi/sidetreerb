@@ -25,14 +25,21 @@ module Sidetree
       end
 
       # Parse chunk file from compressed data.
-      # @param [String] compressed compressed chunk file data.
+      # @param [String] chunk_file compressed chunk file data.
+      # @param [Boolean] compressed Whether the chunk_file is compressed or not, default: true.
       # @return [Sidetree::Model::ChunkFile]
       # @raise [Sidetree::Error]
-      def self.parse(compressed)
+      def self.parse(chunk_file, compressed: true)
         decompressed =
-          Sidetree::Util::Compressor.decompress(
-            compressed,
-            max_bytes: Sidetree::Params::MAX_CHUNK_FILE_SIZE
+          (
+            if compressed
+              Sidetree::Util::Compressor.decompress(
+                chunk_file,
+                max_bytes: Sidetree::Params::MAX_CHUNK_FILE_SIZE
+              )
+            else
+              chunk_file
+            end
           )
         json = JSON.parse(decompressed, symbolize_names: true)
         json.keys.each do |k|

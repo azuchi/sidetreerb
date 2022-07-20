@@ -15,8 +15,7 @@ RSpec.describe Sidetree::CAS::IPFS do
         Sidetree::Model::ChunkFile.create_from_ops(
           create_ops: [Sidetree::OP::Create.generate]
         )
-      ipfs = described_class.new
-      ipfs.write(chunk_file.to_compress)
+      described_class.new.write(chunk_file.to_compress)
     end
     context '"IPFS HTTP API returned OK status' do
       before do
@@ -56,54 +55,63 @@ RSpec.describe Sidetree::CAS::IPFS do
   end
 
   describe "#read" do
-    it "set fetch CIDv0 result as success" do
+    let(:read_url) do
+      "#{ipfs_base_url}cat?arg=QmcUeB9gvUWb5pq4qCsvnM6pbxSgETUvXmd9puVf3jpDXG"
+    end
+    let(:chunk_file) do
+      decompressed =
+        '{"deltas":[{"patches":[{"action":"replace","document":{"publicKeys":[{"id":"signing-key","publicKeyJwk":{"crv":"secp256k1","kty":"EC","x":"e8GxPKV0uIAs1KzIrCKTwUYo4FZ0htHOhv6xvd48OPc","y":"cqkqkzusRi__7UN18hUnodTTbcAe7fCrgASKSqsIri8"},"purposes":[]}],"services":[]}}],"updateCommitment":"EiAgHnpr3R5M3_z7-02T8c7uKtpgwrJzihm34iRcKfPdEg"}]}'
+      Sidetree::Model::ChunkFile.parse(decompressed, compressed: false)
+    end
+    subject do
+      described_class.new.read("QmcUeB9gvUWb5pq4qCsvnM6pbxSgETUvXmd9puVf3jpDXG")
+    end
+    before do
+      stub_request(:post, read_url).to_return(
+        status: 200,
+        body: chunk_file.to_compress
+      )
+    end
+    context "IPFS returns CIDv0" do
+      it "set fetch CIDv0 result as success" do
+        expect(subject.code).to eq(Sidetree::CAS::FetchResult::CODE_SUCCESS)
+        expect(Sidetree::Model::ChunkFile.parse(subject.content)).to eq(
+          chunk_file
+        )
+        expect(WebMock).to have_requested(:post, read_url).once
+      end
     end
 
-    it "set fetch CIDv1 result as success" do
+    context "IPFS returns CIDv1" do
+      before {}
+      it "set fetch CIDv1 result as success" do
+        # TODO
+      end
     end
 
     context "IPFS HTTP API returns non OK status" do
-      it "set fetch result as not-found" do
+      before do
+        stub_request(:post, read_url).to_return(status: 500, body: "unused")
       end
-    end
-
-    context "timeout throws unexpected error" do
       it "set fetch result as not-found" do
-      end
-    end
-
-    context "timeout throws timeout error" do
-      it "set fetch result as not-found" do
-      end
-    end
-
-    context "given hash is invalid" do
-      it "set fetch result correctly" do
+        expect(subject.code).to eq(Sidetree::CAS::FetchResult::CODE_NOT_FOUND)
+        expect(subject.content).to be nil
       end
     end
 
     context "IPFS service is not reachable" do
+      before { stub_request(:post, read_url).to_raise(Errno::ECONNREFUSED) }
       it "return correct fetch result code" do
+        expect(subject.code).to eq(
+          Sidetree::CAS::FetchResult::CODE_CAS_NOT_REACHABLE
+        )
       end
     end
 
     context "fetch throws unexpected error" do
+      before { stub_request(:post, read_url).to_raise(RuntimeError) }
       it "return as content not found" do
-      end
-    end
-
-    context "unexpected error occurred while reading the content stream" do
-      it "return as content not found" do
-      end
-    end
-
-    context "content found is not a file" do
-      it "return correct fetch result code" do
-      end
-    end
-
-    context "content max size is exceeded" do
-      it "return correct fetch result code" do
+        expect(subject.code).to eq(Sidetree::CAS::FetchResult::CODE_NOT_FOUND)
       end
     end
   end
