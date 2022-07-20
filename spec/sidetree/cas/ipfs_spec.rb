@@ -1,6 +1,7 @@
 require "spec_helper"
 
 RSpec.describe Sidetree::CAS::IPFS do
+  let(:add_url) { "#{ipfs_base_url}add" }
   before do
     stub_request(:post, "http://localhost:5001/api/v0/id").to_return(
       status: 200,
@@ -9,36 +10,47 @@ RSpec.describe Sidetree::CAS::IPFS do
     )
   end
   describe "#write" do
+    subject do
+      chunk_file =
+        Sidetree::Model::ChunkFile.create_from_ops(
+          create_ops: [Sidetree::OP::Create.generate]
+        )
+      ipfs = described_class.new
+      ipfs.write(chunk_file.to_compress)
+    end
     context '"IPFS HTTP API returned OK status' do
       before do
-        stub_request(:post, "http://localhost:5001/api/v0/add").to_return(
+        stub_request(:post, add_url).to_return(
           status: 200,
           body:
             '{"Name":"QmcUeB9gvUWb5pq4qCsvnM6pbxSgETUvXmd9puVf3jpDXG","Hash":"QmcUeB9gvUWb5pq4qCsvnM6pbxSgETUvXmd9puVf3jpDXG","Size":"292"}'
         )
       end
       it "return file hash of the content written." do
-        create_op = Sidetree::OP::Create.generate
-        chunk_file =
-          Sidetree::Model::ChunkFile.create_from_ops(create_ops: [create_op])
-        ipfs = described_class.new
-        expect(ipfs.write(chunk_file.to_compress)).to eq(
-          "QmcUeB9gvUWb5pq4qCsvnM6pbxSgETUvXmd9puVf3jpDXG"
-        )
-        expect(WebMock).to have_requested(
-          :post,
-          "http://localhost:5001/api/v0/add"
-        ).once
+        expect(subject).to eq("QmcUeB9gvUWb5pq4qCsvnM6pbxSgETUvXmd9puVf3jpDXG")
+        expect(WebMock).to have_requested(:post, add_url).once
       end
     end
 
     context "IPFS HTTP API returned a non-OK status with or without body" do
+      before do
+        stub_request(:post, add_url).to_return(status: 500, body: "unused")
+      end
       it "raise error." do
+        expect { subject }.to raise_error(
+          Sidetree::Error,
+          "Failed writing content. unused"
+        )
       end
     end
 
     context "IPFS HTTP API returned a non-OK status without body" do
+      before { stub_request(:post, add_url).to_return(status: 500) }
       it "raise error." do
+        expect { subject }.to raise_error(
+          Sidetree::Error,
+          "Failed writing content. "
+        )
       end
     end
   end
