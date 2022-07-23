@@ -39,6 +39,6 @@ Gem::Specification.new do |spec|
   # For more information and examples about making a new gem, checkout our
   # guide at: https://bundler.io/guides/creating_gem.html
   spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'prettier', '~> 3.1.2'
+  spec.add_development_dependency 'prettier', '~> 3.2.0'
   spec.add_development_dependency 'webmock', '~> 3.14.0'
 end
