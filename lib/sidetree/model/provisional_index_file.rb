@@ -2,7 +2,6 @@ module Sidetree
   module Model
     # https://identity.foundation/sidetree/spec/#provisional-index-file
     class ProvisionalIndexFile
-
       attr_reader :provisional_proof_file_uri
       attr_reader :chunks
       attr_reader :operations
@@ -17,10 +16,15 @@ module Sidetree
       # @param [String]
       # @return [Sidetree::Model::ProvisionalIndexFile]
       def self.create(chunk_file_uri, proof_file_uri: nil, update_ops: [])
-        update_refs = update_ops.map do |update|
-          # TODO
-        end
-        ProvisionalIndexFile.new(chunks: [chunk_file_uri], operations: update_refs, proof_file_uri: proof_file_uri)
+        update_refs =
+          update_ops.map do |update|
+            # TODO
+          end
+        ProvisionalIndexFile.new(
+          chunks: [chunk_file_uri],
+          operations: update_refs,
+          proof_file_uri: proof_file_uri
+        )
       end
 
       # Parse provisional index file.
@@ -40,7 +44,6 @@ module Sidetree
             end
           )
         json = JSON.parse(decompressed, symbolize_names: true)
-
       end
     end
   end

@@ -1,7 +1,6 @@
-require 'spec_helper'
+require "spec_helper"
 
 RSpec.describe Sidetree::Model::ProvisionalIndexFile do
-  describe '#create' do
-
+  describe "#create" do
   end
 end
