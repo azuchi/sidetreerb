@@ -30,7 +30,8 @@ module Sidetree
     MAX_DELTA_SIZE = 1000
     # Maximum compressed chunk file size. 10MB.
     MAX_CHUNK_FILE_SIZE = 10_000_000
-
+    # Maximum compressed Provisional Index File size. 1 MB (zipped)
+    MAX_PROVISIONAL_INDEX_FILE_SIZE = 1_000_000
     # Default DID method
     DEFAULT_METHOD = "sidetree"
 

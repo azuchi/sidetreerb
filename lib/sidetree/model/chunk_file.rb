@@ -30,12 +30,13 @@ module Sidetree
       # @return [Sidetree::Model::ChunkFile]
       # @raise [Sidetree::Error]
       def self.parse(chunk_file, compressed: true)
+        max_bytes = Sidetree::Params::MAX_CHUNK_FILE_SIZE * Sidetree::Util::Compressor::ESTIMATE_DECOMPRESSION_MULTIPLIER
         decompressed =
           (
             if compressed
               Sidetree::Util::Compressor.decompress(
                 chunk_file,
-                max_bytes: Sidetree::Params::MAX_CHUNK_FILE_SIZE
+                max_bytes: max_bytes
               )
             else
               chunk_file

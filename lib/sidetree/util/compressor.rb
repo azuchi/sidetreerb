@@ -3,6 +3,9 @@ require "zlib"
 module Sidetree
   module Util
     module Compressor
+      # The estimated ratio/multiplier of decompressed Sidetree CAS file size compared against the compressed file size.
+      ESTIMATE_DECOMPRESSION_MULTIPLIER = 3
+
       module_function
 
       # Compresses teh data in gzip and return it as buffer.
